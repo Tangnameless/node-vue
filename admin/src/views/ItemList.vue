@@ -4,6 +4,12 @@
     <el-table :data="items">
       <el-table-column prop="_id" label="ID" width="250"></el-table-column>
       <el-table-column prop="name" label="物品名称"></el-table-column>
+      <el-table-column prop="icon" label="图标">
+        <template slot-scope="scope">
+          <!-- 加上冒号会首先将这个属性当作变量解析 -->
+          <img :src="scope.row.icon" style="height:3rem;">
+      </template>
+      </el-table-column>
       <el-table-column fixed="right" label="操作" width="100">
         <template slot-scope="scope">
           <el-button type="text" size="small" 
