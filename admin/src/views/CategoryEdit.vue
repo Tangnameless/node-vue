@@ -36,27 +36,27 @@ export default {
     async save() {
       let res
       if(this.id){
-        res = await this.$http.put(`categories/${this.id}`, this.model);
+        res = await this.$http.put(`rest/categories/${this.id}`, this.model);
       }else{
-        res = await this.$http.post("categories", this.model);
+        res = await this.$http.post("rest/categories", this.model);
       }
       if (res) {
-        this.$router.push("/categories/list");
+        this.$router.push("list");
         this.$message({
           type: "success",
           message: "保存成功",
         });
       }
     },
-
+    
     async fetch() {
-      const res = await this.$http.get(`categories/${this.id}`) // 模板字符串（` `）
+      const res = await this.$http.get(`rest/categories/${this.id}`) // 模板字符串（` `）
       this.model = res.data
     },
 
     
     async fetchPatents() {
-      const res = await this.$http.get(`categories`) // 模板字符串（` `）
+      const res = await this.$http.get(`rest/categories`) // 模板字符串（` `）
       this.parents = res.data
     },
 
