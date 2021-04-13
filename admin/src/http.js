@@ -21,8 +21,6 @@ http.interceptors.request.use(function (config) {
 });
 
 
-
-
 // 全局捕获错误
 // 使用axios 拦截器
 http.interceptors.response.use(res => {

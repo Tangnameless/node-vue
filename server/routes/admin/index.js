@@ -10,6 +10,13 @@ module.exports = app => {
         mergeParams: true
     });
 
+    // 登录校验中间件
+    const authMiddleware = require('../../middleware/auth')
+
+    // 解析URL，自动查询模型中间件
+    const resourceMiddleware = require('../../middleware/resource')
+
+    app.use('/admin/api/rest/:resource', authMiddleware(), resourceMiddleware(), router)
 
     // 命名规范
     // 模型用大写首字母命名
@@ -35,27 +42,7 @@ module.exports = app => {
     })
 
     // 资源列表
-    router.get('', async (req, res, next) => {
-        const token = String(req.headers.authorization || '').split(' ').pop();
-        try {
-            assert(token, 401, '请先登录') //express4 对assert有bug
-        } catch (err) {
-            next(err);
-        }
-        const { _id } = jwt.verify(token, app.get('secret'))
-        try {
-            assert(_id, 401, '请先登录') //express4 对assert有bug
-        } catch (err) {
-            next(err);
-        }
-        req.user = await AdminUser.findById(_id)
-        try {
-            assert(req.user, 401, '请先登录') //express4 对assert有bug
-        } catch (err) {
-            next(err);
-        }
-        await next()
-    }, async (req, res) => {
+    router.get('', async (req, res) => {
         const queryOptions = {}
         if (req.Model.modelName === 'Category') { //modelName 是Model的一个属性
             queryOptions.populate = 'parent'
@@ -70,15 +57,13 @@ module.exports = app => {
         res.send(model)
     })
 
-    app.use('/admin/api/rest/:resource', async (req, res, next) => {
-        const modelName = require('inflection').classify(req.params.resource)
-        req.Model = require(`../../models/${modelName}`)
-        next()
-    }, router)
-
+    // 资源上传
     const multer = require('multer')
     const upload = multer({ dest: __dirname + '/../../uploads' })
     app.post('/admin/api/upload',
+        authMiddleware(), //加上中间以后会提示“请先登录”
+        // 图片上传和显示那两个接口都是原生的ajax请求
+        // 可以试试element-ui中上传组件有一个http-request可以代替原生
         upload.single('file'),
         async (req, res) => {
             const file = req.file
