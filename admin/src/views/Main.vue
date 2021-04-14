@@ -47,27 +47,71 @@
 
     <el-container>
       <el-header style="text-align: right; font-size: 12px">
-        <el-dropdown>
+        <el-dropdown trigger="click">
           <i class="el-icon-setting" style="margin-right: 15px"></i>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>查看</el-dropdown-item>
-            <el-dropdown-item>新增</el-dropdown-item>
-            <el-dropdown-item>删除</el-dropdown-item>
+            <el-dropdown-item @click.native="$router.push(`/admin_users/edit/${model._id}`)">查看个人资料</el-dropdown-item>
+            <el-dropdown-item @click.native="logout()">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-        <span>王小虎</span>
+        <span>欢迎你，{{ this.model.username }}</span>
       </el-header>
 
       <el-main>
         <router-view :key="$route.path"></router-view>
       </el-main>
+
+      <el-footer>北京邮电大学电子工程学院通信与网络研究中心（2021）</el-footer>
     </el-container>
   </el-container>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      model: {
+        username: "",
+      },
+    };
+  },
+
+  methods: {
+    // 获取当前登录用户信息
+    async fetchUser() {
+      const res = await this.$http.post("/userinfo");
+      this.model = Object.assign({}, this.model, res.data);
+    },
+
+    // 用户登出
+    async logout(){
+      this.$confirm(`是否要退出`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async() => {
+            window.localStorage.removeItem('token')
+          this.$message({
+            type: 'success',
+            message: '成功退出!'
+          });
+          this.$router.push(`/login`);
+        });
+    }
+  },
+
+  created() {
+    this.fetchUser();
+  },
+};
+</script>
+
 <style>
-.el-header {
-  background-color: #b3c0d1;
-  color: #333;
+.el-header,
+.el-footer {
+  background-color: #409eff;
+  color: rgb(255, 253, 253);
+  text-align: center;
   line-height: 60px;
 }
 
@@ -75,18 +119,3 @@
   color: #333;
 }
 </style>
-
-<script>
-export default {
-  data() {
-    const item = {
-      date: "2016-05-02",
-      name: "王小虎",
-      address: "上海市普陀区金沙江路 1518 弄",
-    };
-    return {
-      tableData: Array(20).fill(item),
-    };
-  },
-};
-</script>

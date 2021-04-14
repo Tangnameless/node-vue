@@ -1,4 +1,4 @@
-const AdminUser = require('../../models/AdminUser');
+
 
 // 通用CURD
 module.exports = app => {
@@ -26,7 +26,7 @@ module.exports = app => {
         const model = await req.Model.create(req.body)
         res.send(model)
     })
-
+    
     // 更新
     router.put('/:id', async (req, res) => {
         const model = await req.Model.findByIdAndUpdate(req.params.id, req.body)
@@ -77,16 +77,6 @@ module.exports = app => {
         // 1.根据用户名找用户
         const user = await AdminUser.findOne({ username }).select('+password')
         assert(user, 422, '用户不存在') 
-        // try {
-        //     assert(user, 422, '用户不存在') //express4 对assert有bug
-        // } catch (err) {
-        //     next(err);
-        // }
-        // if(!user){
-        //     return res.status(422).send({
-        //         message: '用户不存在'
-        //     })
-        // }
         // 2.校验密码
         const isValid = require('bcrypt').compareSync(password, user.password)
         assert(isValid, 422, '密码错误')
@@ -97,6 +87,18 @@ module.exports = app => {
         }, app.get('secret'))
         res.send({ token })
     })
+
+    // 查询用户信息
+    // 这里就先不要用rest风格的接口了
+    app.post('/admin/api/userinfo',async (req, res, next) =>{
+        const token = String(req.headers.authorization || '').split(' ').pop();
+        const { _id } = jwt.verify(token, req.app.get('secret'))
+        // 根据用户名找用户
+        const user = await AdminUser.findById(_id)
+        res.send(user);
+
+    })
+
 
     // 错误处理函数
     app.use(async (err, req, res, next) => {
